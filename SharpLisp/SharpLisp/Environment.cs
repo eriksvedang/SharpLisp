@@ -473,6 +473,10 @@ namespace SharpLisp
 			Scope s = pCurrentScope.TryResolveScope (symbolName);
 			s.SetVar (symbolName, Eval(pList [2], pCurrentScope));
 			return s.vars[symbolName];
+
+//			object o = pList [1];
+//			o = Eval (pList[2], pCurrentScope);
+//			return pList
 		}
 
 		private object VariadicPrint(object[] args) {
