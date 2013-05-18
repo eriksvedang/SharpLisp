@@ -25,11 +25,18 @@ namespace SharpLisp
 			_globalScope.vars ["-"] = new SharpFunction (BuiltInFunctions.VariadicSubtraction, "-");
 			_globalScope.vars ["/"] = new SharpFunction (BuiltInFunctions.VariadicDivision, "/");
 			_globalScope.vars ["="] = new SharpFunction (BuiltInFunctions.VariadicEqual, "=");
+			_globalScope.vars [">"] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a > b), ">");
+			_globalScope.vars ["<"] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a < b), "<");
+			_globalScope.vars ["<="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a <= b), "<=");
+			_globalScope.vars [">="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a >= b), ">=");
+			_globalScope.vars ["mod"] = new SharpFunction (BuiltInFunctions.Modulus, "mod");
 
+			_globalScope.vars ["empty?"] = new SharpFunction (BuiltInFunctions.IsEmpty, "empty?");
 			_globalScope.vars ["nth"] = new SharpFunction (BuiltInFunctions.Nth, "nth");
 			_globalScope.vars ["first"] = new SharpFunction (BuiltInFunctions.First, "first");
 			_globalScope.vars ["rest"] = new SharpFunction (BuiltInFunctions.Rest, "rest");
 			_globalScope.vars ["count"] = new SharpFunction (BuiltInFunctions.Count, "count");
+			_globalScope.vars ["cons"] = new SharpFunction (BuiltInFunctions.Cons, "cons");
 
 			_globalScope.vars ["load"] = new SharpFunction (LoadFile, "load");
 		}
@@ -52,7 +59,11 @@ namespace SharpLisp
 				foreach(object sexp in rootExpressions) {
 					object result = Eval (sexp, _globalScope);
 					if(pPrint) {
-						Console.WriteLine (result);
+						if(result != null) {
+							Console.WriteLine (result);
+						} else {
+							Console.WriteLine ("null");
+						}
 					}
 				}
 			}
@@ -94,24 +105,43 @@ namespace SharpLisp
 
 			if (firstItem is ReservedToken) {
 				ReservedToken token = firstItem as ReservedToken;
+
 				if (token.type == TokenType.DEF) {
 					return Def (pList, pCurrentScope);
-				} else if (token.type == TokenType.FN) {
+				} 
+
+				if (token.type == TokenType.FN) {
 					return Fn (pList, pCurrentScope);
-				} else if (token.type == TokenType.LET) {
+				} 
+
+				if (token.type == TokenType.LET) {
 					return Let (pList, pCurrentScope);
-				} else if (token.type == TokenType.IF) {
-					return If (pList, pCurrentScope);
-				} else if (token.type == TokenType.CONJ) {
-					return Conj (pList, pCurrentScope);
-				} else {
-					throw new Exception("Can't understand ReservedToken: " + token);
 				}
-			} else if (firstItem is SharpFunction) {
+
+				if (token.type == TokenType.IF) {
+					return If (pList, pCurrentScope);
+				}
+
+				if (token.type == TokenType.CONJ) {
+					return Conj (pList, pCurrentScope);
+				}
+
+				if (token.type == TokenType.MACRO) {
+					return Macro (pList, pCurrentScope);
+				}
+
+				if (token.type == TokenType.QUOTE) {
+					return Quote (pList, pCurrentScope);
+				}
+					
+				throw new Exception("Can't understand ReservedToken: " + token);
+			} 
+
+			if (firstItem is SharpFunction) {
 				return FunctionCall (pList, pCurrentScope);
-			} else {
-				throw new Exception ("Can't eval function with first item " + firstItem);
-			}
+			} 
+
+			throw new Exception ("Can't eval function with first item " + firstItem);
 		}
 
 		object GetEvaled(SharpList pList, int pPosition, Scope pCurrentScope) {
@@ -119,10 +149,6 @@ namespace SharpLisp
 		}
 
 		private object EvalVector(SharpVector pVector, Scope pCurrentScope) {
-			if (pVector.Count == 0) {
-				return pVector;
-			}
-
 			SharpVector evaledVector = new SharpVector ();
 
 			foreach (var item in pVector) {
@@ -148,7 +174,9 @@ namespace SharpLisp
 			}
 
 			Scope letScope = new Scope ("Let" + _letScopeCounter++, pCurrentScope);
+#if LOG_SCOPES
 			Console.WriteLine ("Created new let scope: " + letScope.name);
+#endif
 
 			for (int i = 0; i < bindingsVector.Count; i += 2) {
 				SymbolToken symbolToken = bindingsVector [i] as SymbolToken;
@@ -188,12 +216,18 @@ namespace SharpLisp
 			}
 
 			Scope closure = new Scope ("Closure" + _closureCounter++, pCurrentScope);
+#if LOG_SCOPES
 			Console.WriteLine ("Created new closure: " + closure.name);
+#endif
+
+			string functionName = "Fn" + _functionCounter++;
 
 			return new SharpFunction(args => {
 
 				Scope functionCallScope = new Scope ("FunctionCallScope" + _functionCallScopeCounter++, closure);
+#if LOG_SCOPES
 				Console.WriteLine ("Created new function call scope: " + functionCallScope.name);
+#endif
 
 				int argPos = 0;
 				foreach(var argBinding in argBindingsDeepCopy) {
@@ -204,20 +238,33 @@ namespace SharpLisp
 					functionCallScope.SetVar(symbol.value, args[argPos++]);
 				}
 
+//				Console.WriteLine(functionName + " was called with " + args.Length + " arguments:");
+//				foreach(var arg in args) {
+//					if(arg == null) {
+//						Console.WriteLine("null");
+//					} else {
+//						Console.WriteLine(arg.ToString());
+//					}
+//				}
+
 				object lastResult = null;
 				foreach(var item in body) {
 					//Console.WriteLine("Time to eval " + item);
 					lastResult = Eval (item, functionCallScope);
 				}
 				return lastResult;
-			}, "Fn" + _functionCounter++);
+			}, functionName);
 		}
 
 		private object FunctionCall(SharpList pList, Scope pCurrentScope) {
 
 			List<object> evaledArgs = new List<object> ();
 			for (int i = 1; i < pList.Count; i++) {
-				evaledArgs.Add(GetEvaled (pList, i, pCurrentScope));
+				if(pList[i] != null) {
+					evaledArgs.Add(GetEvaled (pList, i, pCurrentScope));
+				} else {
+					evaledArgs.Add (null);
+				}
 			}
 
 			SharpFunction f = GetEvaled(pList, 0, pCurrentScope) as SharpFunction;
@@ -260,6 +307,29 @@ namespace SharpLisp
 			object itemToInsert = Eval(pList[2], pCurrentScope);
 			deepCopy.Add (itemToInsert);
 			return deepCopy;
+		}
+
+		private object Macro(SharpList pList, Scope pCurrentScope) {
+			SharpVector argBindings = pList [1] as SharpVector;
+			if(argBindings == null) {
+				throw new Exception("The first argument to fn is not a vector of args");
+			}
+
+			SharpVector argBindingsDeepCopy = new SharpVector ();
+			foreach(var argBinding in argBindings) {
+				argBindingsDeepCopy.Add (argBinding);
+			}
+
+			SharpList body = new SharpList ();
+			for (int i = 2; i < pList.Count; i++) {
+				body.Add(pList[i]);
+			}
+
+			return null;
+		}
+
+		private object Quote(SharpList pList, Scope pCurrentScope) {
+			return pList [1];
 		}
 	}
 }

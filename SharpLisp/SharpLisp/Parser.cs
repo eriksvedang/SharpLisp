@@ -46,6 +46,8 @@ namespace SharpLisp
 				sexp = token;
 			} else if (token is ReservedToken) {
 				sexp = token;
+			} else if (token is NullToken) {
+				sexp = null;
 			} else if (token.type == TokenType.LEFT_PAREN) {
 				sexp = ReadList ();
 			} else if (token.type == TokenType.LEFT_BRACKET) {
@@ -54,9 +56,9 @@ namespace SharpLisp
 				throw new Exception ("Can't understand token " + token);
 			}
 
-			if (sexp == null) {
-				throw new Exception ("The returned s-expression is null");
-			}
+//			if (sexp == null) {
+//				throw new Exception ("The returned s-expression is null");
+//			}
 
 			return sexp;
 		}

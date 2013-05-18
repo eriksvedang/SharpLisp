@@ -36,6 +36,10 @@ namespace SharpLisp
 				} else if (c == ']') {
 					_tokens.Add (new Token(TokenType.RIGHT_BRACKET));
 					Step ();
+				} else if (c == ';') {
+					while(MoreToRead() && ReadCurrentChar() != '\n') {
+						Step ();
+					}
 				} else if (IsNumber (c)) {
 					_tokens.Add (new FloatToken(ReadNr ()));
 				} else if (c == '\"') {
@@ -52,6 +56,12 @@ namespace SharpLisp
 						_tokens.Add (new ReservedToken(TokenType.IF));
 					} else if (text == "conj") {
 						_tokens.Add (new ReservedToken(TokenType.CONJ));
+					} else if (text == "macro") {
+						_tokens.Add (new ReservedToken(TokenType.MACRO));
+					} else if (text == "quote") {
+						_tokens.Add (new ReservedToken(TokenType.QUOTE));
+					} else if (text == "null") {
+						_tokens.Add (new NullToken());
 					} else if (text == "true") {
 						_tokens.Add (new BoolToken(true));
 					} else if (text == "false") {
@@ -73,6 +83,7 @@ namespace SharpLisp
 
 		void Step() {
 			_readPosition++;
+			//Console.WriteLine ("Stepped to " + ReadCurrentChar());
 		}
 
 		bool MoreToRead() {
@@ -98,7 +109,7 @@ namespace SharpLisp
 		}
 
 		bool IsChar(char c) {
-			return "abcdefghijklmnopqrstuvwxyz_+-*/@#&?!%=".Contains (c.ToString().ToLower());
+			return "abcdefghijklmnopqrstuvwxyz_+-*/@#&?!%=<>".Contains (c.ToString().ToLower());
 		}
 
 		string ReadText() {

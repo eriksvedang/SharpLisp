@@ -16,12 +16,9 @@ namespace SharpLisp
 		}
 
 		public object TryResolveSymbol(SymbolToken pSymbolToken) {
-			object result = null;
-			vars.TryGetValue (pSymbolToken.value, out result);
-
-			if (result != null) {
+			if (vars.ContainsKey(pSymbolToken.value)) {
 				//Console.WriteLine("Resolved " + pSymbolToken + " in scope " + name);
-				return result;
+				return vars[pSymbolToken.value];
 			} else if (enclosingScope != null) {
 				//Console.WriteLine("Can't find " + pSymbolToken + " in scope " + name + ", looking in enclosing scope: " + enclosingScope.name);
 				return enclosingScope.TryResolveSymbol (pSymbolToken);

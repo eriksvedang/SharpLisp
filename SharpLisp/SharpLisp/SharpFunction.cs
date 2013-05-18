@@ -4,12 +4,10 @@ namespace SharpLisp
 {
 	public class SharpFunction
 	{
-		public delegate object FunctionDelegate(object[] args);
-
-		public FunctionDelegate function;
+		public Func<object[], object> function;
 		public string name;
 
-		public SharpFunction (FunctionDelegate pFunction, string pName)
+		public SharpFunction (Func<object[], object> pFunction, string pName)
 		{
 			function = pFunction;
 			name = pName;
@@ -17,7 +15,7 @@ namespace SharpLisp
 
 		public override string ToString ()
 		{
-			return string.Format (name);
+			return name;
 		}
 	}
 }

@@ -16,6 +16,9 @@ namespace SharpLisp
 		LET,
 		IF,
 		CONJ,
+		MACRO,
+		QUOTE,
+		NULL,
 	};
 
 	public class Token
@@ -29,6 +32,18 @@ namespace SharpLisp
 		public override string ToString ()
 		{
 			return type.ToString ();
+		}
+	}
+
+	public class NullToken : Token
+	{
+		public NullToken() : base(TokenType.NULL) {
+
+		}
+
+		public override string ToString ()
+		{
+			return "null";
 		}
 	}
 

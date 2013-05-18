@@ -16,7 +16,11 @@ namespace SharpLisp
 			sb.Append ("(");
 			int i = this.Count;
 			foreach (var item in this) {
-				sb.Append (item);
+				if (item == null) {
+					sb.Append ("null");
+				} else {
+					sb.Append (item);
+				}
 				i--;
 				if (i > 0) {
 					sb.Append (" ");
