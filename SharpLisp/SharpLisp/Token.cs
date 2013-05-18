@@ -19,6 +19,7 @@ namespace SharpLisp
 		MACRO,
 		QUOTE,
 		NULL,
+		TICK,
 	};
 
 	public class Token

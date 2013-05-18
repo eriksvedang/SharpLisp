@@ -30,6 +30,7 @@ namespace SharpLisp
 			_globalScope.vars ["<="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a <= b), "<=");
 			_globalScope.vars [">="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a >= b), ">=");
 			_globalScope.vars ["mod"] = new SharpFunction (BuiltInFunctions.Modulus, "mod");
+			_globalScope.vars ["i"] = new SharpFunction (BuiltInFunctions.Interop, "i");
 
 			_globalScope.vars ["empty?"] = new SharpFunction (BuiltInFunctions.IsEmpty, "empty?");
 			_globalScope.vars ["nth"] = new SharpFunction (BuiltInFunctions.Nth, "nth");
@@ -77,7 +78,7 @@ namespace SharpLisp
 			StreamReader sr = File.OpenText ((string)args[0]);
 			ReadEval (sr.ReadToEnd(), false);
 			sr.Close ();
-			return new SharpList ();
+			return null;
 		}
 
 		public object Eval(object o, Scope pCurrentScope) {

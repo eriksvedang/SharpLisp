@@ -1,9 +1,49 @@
 using System;
+using System.Reflection;
+using System.Collections.Generic;
 
 namespace SharpLisp
 {
 	public class BuiltInFunctions
 	{
+		public static object Interop(object[] args) {
+
+			SymbolToken typeName = (SymbolToken)args [0];
+			SymbolToken methodName = (SymbolToken)args [1];
+
+			List<object> remainingArgs = new List<object> ();
+			for (int i = 2; i < args.Length; i++) {
+				remainingArgs.Add (args[i]);
+			}
+
+			var assembly = Assembly.GetCallingAssembly ();
+			var modules = assembly.GetLoadedModules ();
+
+//			Console.WriteLine ("Loaded modules: " + string.Join<Module>(", ", modules));
+
+			foreach(var module in modules) {
+
+//				Console.WriteLine ("Loaded methods: " + string.Join<MethodInfo>(", ", module.GetMethods()));
+//				Console.WriteLine ("Loaded types: " + string.Join<Type>(", ", module.GetTypes()));
+
+				Type type = module.GetType (typeName.value);
+
+				if(type == null) {
+					continue;
+				}
+
+//				Console.WriteLine ("Methods: " + string.Join<MethodInfo>(", ", type.GetMethods()));
+//				Console.WriteLine ("Fields: " + string.Join<FieldInfo>(", ", type.GetFields()));
+
+				var methodInfo = type.GetMethod (methodName.value);
+				object result = methodInfo.Invoke(null, remainingArgs.ToArray());
+
+				return result;
+			}
+
+			throw new Exception ("Can't find type " + typeName); 
+		}
+
 		public static object IsEmpty(object[] args) {
 			if(args[0] == null) {
 				return true;

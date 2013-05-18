@@ -36,6 +36,9 @@ namespace SharpLisp
 				} else if (c == ']') {
 					_tokens.Add (new Token(TokenType.RIGHT_BRACKET));
 					Step ();
+				} else if (c == '\'') {
+					_tokens.Add (new Token(TokenType.TICK));
+					Step ();
 				} else if (c == ';') {
 					while(MoreToRead() && ReadCurrentChar() != '\n') {
 						Step ();
@@ -109,7 +112,7 @@ namespace SharpLisp
 		}
 
 		bool IsChar(char c) {
-			return "abcdefghijklmnopqrstuvwxyz_+-*/@#&?!%=<>".Contains (c.ToString().ToLower());
+			return "abcdefghijklmnopqrstuvwxyz_+-*/@#&?!%=<>.,;:".Contains (c.ToString().ToLower());
 		}
 
 		string ReadText() {
