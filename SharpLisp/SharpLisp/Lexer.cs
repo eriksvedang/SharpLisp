@@ -22,7 +22,7 @@ namespace SharpLisp
 			while(MoreToRead()) {
 				char c = ReadCurrentChar ();
 
-				if (IsWhitespace(c)) {
+				if (IsWhitespace (c)) {
 					Step ();
 				} else if (c == '(') {
 					_tokens.Add (new Token(TokenType.LEFT_PAREN));
@@ -40,7 +40,7 @@ namespace SharpLisp
 					_tokens.Add (new Token(TokenType.TICK));
 					Step ();
 				} else if (c == ';') {
-					while(MoreToRead() && ReadCurrentChar() != '\n') {
+					while (MoreToRead() && ReadCurrentChar() != '\n') {
 						Step ();
 					}
 				} else if (IsNumber (c)) {
@@ -50,10 +50,10 @@ namespace SharpLisp
 				} else if (c == '&') {
 					_tokens.Add (new ReservedToken(TokenType.AMPERSAND));
 					Step ();
-				} else if (IsStrangeSymbol(c)) {
+				} else if (c == '.') {
 					_tokens.Add (new SymbolToken(c.ToString()));
 					Step ();
-				} else if (IsFirstChar (c)) {
+				} else if(CharCanBeginSymbol (c)) {
 					string text = ReadText ();
 					if (text == "def") {
 						_tokens.Add (new ReservedToken(TokenType.DEF));
@@ -63,8 +63,6 @@ namespace SharpLisp
 						_tokens.Add (new ReservedToken(TokenType.LET));
 					} else if (text == "if") {
 						_tokens.Add (new ReservedToken(TokenType.IF));
-					} else if (text == "conj") {
-						_tokens.Add (new ReservedToken(TokenType.CONJ));
 					} else if (text == "defmacro") {
 						_tokens.Add (new ReservedToken(TokenType.DEFMACRO));
 					} else if (text == "quote") {
@@ -79,8 +77,9 @@ namespace SharpLisp
 						_tokens.Add (new BoolToken(false));
 					} else {
 						_tokens.Add (new SymbolToken(text));
-					}
-				} else {
+					} 
+				} 
+				else {
 					throw new Exception ("Can't understand char '" + c + "'");
 				}
 			}
@@ -119,12 +118,8 @@ namespace SharpLisp
 			return Convert.ToSingle (s);
 		}
 
-		bool IsFirstChar(char c) {
-			return "abcdefghijklmnopqrstuvwxyz".Contains (c.ToString().ToLower());
-		}
-
-		bool IsStrangeSymbol(char c) {
-			return "_+-*/@#?!%=<>.,;:".Contains (c.ToString().ToLower());
+		bool CharCanBeginSymbol(char c) {
+			return "abcdefghijklmnopqrstuvwxyz_+-*/<>?!%=".Contains (c.ToString().ToLower());
 		}
 
 		bool IsChar(char c) {

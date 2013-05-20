@@ -44,6 +44,7 @@ namespace SharpLisp
 			_globalScope.vars ["rest"] = new SharpFunction (BuiltInFunctions.Rest, "rest");
 			_globalScope.vars ["count"] = new SharpFunction (BuiltInFunctions.Count, "count");
 			_globalScope.vars ["cons"] = new SharpFunction (BuiltInFunctions.Cons, "cons");
+			_globalScope.vars ["conj"] = new SharpFunction (BuiltInFunctions.Conj, "conj");
 			_globalScope.vars ["list"] = new SharpFunction (BuiltInFunctions.List, "list");
 
 			_globalScope.vars ["load"] = new SharpFunction (LoadFile, "load");
@@ -148,10 +149,6 @@ namespace SharpLisp
 
 				if (token.type == TokenType.IF) {
 					return If (pList, pCurrentScope);
-				}
-
-				if (token.type == TokenType.CONJ) {
-					return Conj (pList, pCurrentScope);
 				}
 
 				if (token.type == TokenType.DEFMACRO) {
@@ -345,20 +342,6 @@ namespace SharpLisp
 			}
 
 			return result;
-		}
-
-		private object Conj(SharpList pList, Scope pCurrentScope) {
-			SharpVector vector = Eval(pList[1], pCurrentScope) as SharpVector;
-			if (vector == null) {
-				throw new Exception ("First argument to conj is not a vector");
-			}
-			SharpVector deepCopy = new SharpVector ();
-			foreach (var item in vector) {
-				deepCopy.Add (item);
-			}
-			object itemToInsert = Eval(pList[2], pCurrentScope);
-			deepCopy.Add (itemToInsert);
-			return deepCopy;
 		}
 
 		private object DefMacro(SharpList pList, Scope pCurrentScope) {

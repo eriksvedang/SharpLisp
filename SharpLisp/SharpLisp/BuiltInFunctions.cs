@@ -97,27 +97,13 @@ namespace SharpLisp
 		}
 
 		public static object Cons(object[] args) {
-			object itemToInsert = args [0];
+			var seq = args [1] as ISeq;
+			return seq.Cons (args[0]);
+		}
 
-			if (args [1] is SharpVector) {
-				var vector = args [1] as SharpVector;
-				var deepCopy = new SharpVector();
-				deepCopy.Add (itemToInsert);
-				foreach (var item in vector) {
-					deepCopy.Add (item);
-				}
-				return deepCopy;
-			} else if (args [1] is SharpList) {
-				var list = args [1] as SharpList;
-				var deepCopy = new SharpList ();
-				deepCopy.Add (itemToInsert);
-				foreach (var item in list) {
-					deepCopy.Add (item);
-				}
-				return deepCopy;
-			}
-
-			throw new Exception ("Second argument to cons is not a List or Vector: " + args[1]);
+		public static object Conj(object[] args) {
+			var seq = args [0] as ISeq;
+			return seq.Conj (args[1]);
 		}
 
 		public static object List(object[] args) {
@@ -129,44 +115,29 @@ namespace SharpLisp
 		}
 
 		public static object Nth(object[] args) {
-			SharpVector vector = args[0] as SharpVector;
+			var seq = args [0] as ISeq;
 			float pos = (float)args [1];
-			return vector[(int)pos];
+			return seq.Nth ((int)pos);
 		}
 
 		public static object First(object[] args) {
-			SharpVector vector = args[0] as SharpVector;
-			if (vector.Count == 0) {
-				return null;
-			}
-			return vector[0];
+			var seq = args [0] as ISeq;
+			return seq.First ();
 		}
 
 		public static object Rest(object[] args) {
-			if (args[0] == null) {
-				return null;
-			}
-
-			SharpVector vector = args[0] as SharpVector;
-
-			if (vector.Count <= 1) {
-				return null;
-			}
-
-			var deepCopy = new SharpVector ();
-			for(int i = 1; i < vector.Count; i++) {
-				deepCopy.Add (vector[i]);
-			}
-			return deepCopy;
+			var seq = args [0] as ISeq;
+			return seq.Rest ();
 		}
 
 		public static object Count(object[] args) {
-			if (args[0] == null) {
-				return null;
+			if (args [0] is SharpList) {
+				return (args [0] as SharpList).Count;
+			} else if (args [0] is SharpVector) {
+				return (args [0] as SharpVector).Count;
+			} else {
+				throw new Exception ("Can't call count on args[0] " + args[0]);
 			}
-			AssertType<SharpVector>(args, 0);
-			SharpVector vector = args[0] as SharpVector;
-			return vector.Count;
 		}
 
 		public static object Modulus(object[] args) {
