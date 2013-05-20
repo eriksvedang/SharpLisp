@@ -32,6 +32,14 @@ namespace SharpLisp
 			//Console.WriteLine ("Loaded modules: " + string.Join<Module>(", ", s_modules));
 		}
 
+		public static object Throw(object[] args) {
+			throw new Exception (args[0] as string);
+		}
+
+		public static object Seq(object[] args) {
+			return args [0] as ISeq;
+		}
+
 		public static object Interop(object[] args) {
 
 			SymbolToken typeName = (SymbolToken)args [0];
@@ -88,16 +96,15 @@ namespace SharpLisp
 		public static object IsEmpty(object[] args) {
 			if(args[0] == null) {
 				return true;
-			} else if (args [0] is SharpVector) {
-				SharpVector vector = args [0] as SharpVector;
-				return vector.Count == 0;
-			} else {
-				throw new Exception ("First arg to empty? is of type " + args[0].GetType());
-			}
+			} 
+			return (int)Count (args) == 0;
 		}
 
 		public static object Cons(object[] args) {
 			var seq = args [1] as ISeq;
+			if(seq == null) {
+				throw new Exception ("Can't cast arg 1 to ISeq");
+			}
 			return seq.Cons (args[0]);
 		}
 
@@ -238,7 +245,7 @@ namespace SharpLisp
 				}
 			}
 			Console.WriteLine (concat.ToString());
-			return new SharpList();
+			return null;
 		}
 
 		public static void AssertArgumentCount(int pNr, object[] args) {

@@ -25,6 +25,7 @@ namespace SharpLisp
 			_globalScope.vars ["eval"] = new SharpFunction (InternalEval, "eval");
 
 			_globalScope.vars ["print"] = new SharpFunction (BuiltInFunctions.VariadicPrint, "print");
+			_globalScope.vars ["throw"] = new SharpFunction (BuiltInFunctions.Throw, "throw");
 
 			_globalScope.vars ["+"] = new SharpFunction (BuiltInFunctions.VariadicAdd, "+");
 			_globalScope.vars ["*"] = new SharpFunction (BuiltInFunctions.VariadicMultiplication, "*");
@@ -38,6 +39,7 @@ namespace SharpLisp
 			_globalScope.vars ["mod"] = new SharpFunction (BuiltInFunctions.Modulus, "mod");
 			_globalScope.vars ["."] = new SharpFunction (BuiltInFunctions.Interop, ".");
 
+			_globalScope.vars ["seq"] = new SharpFunction (BuiltInFunctions.Seq, "seq");
 			_globalScope.vars ["empty?"] = new SharpFunction (BuiltInFunctions.IsEmpty, "empty?");
 			_globalScope.vars ["nth"] = new SharpFunction (BuiltInFunctions.Nth, "nth");
 			_globalScope.vars ["first"] = new SharpFunction (BuiltInFunctions.First, "first");
