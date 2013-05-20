@@ -57,16 +57,34 @@ namespace SharpLisp
 
 		public static object Cons(object[] args) {
 			object itemToInsert = args [0];
-			SharpVector vector = args[1] as SharpVector;
-			if (vector == null) {
-				throw new Exception ("First argument to cons is not a vector: " + args[0]);
+
+			if (args [1] is SharpVector) {
+				var vector = args [1] as SharpVector;
+				var deepCopy = new SharpVector();
+				deepCopy.Add (itemToInsert);
+				foreach (var item in vector) {
+					deepCopy.Add (item);
+				}
+				return deepCopy;
+			} else if (args [1] is SharpList) {
+				var list = args [1] as SharpList;
+				var deepCopy = new SharpList ();
+				deepCopy.Add (itemToInsert);
+				foreach (var item in list) {
+					deepCopy.Add (item);
+				}
+				return deepCopy;
 			}
-			SharpVector deepCopy = new SharpVector ();
-			deepCopy.Add (itemToInsert);
-			foreach (var item in vector) {
-				deepCopy.Add (item);
+
+			throw new Exception ("Second argument to cons is not a List or Vector: " + args[1]);
+		}
+
+		public static object List(object[] args) {
+			SharpList newList = new SharpList ();
+			for(int i = 0; i < args.Length; i++) {
+				newList.Add(args[i]);
 			}
-			return deepCopy;
+			return newList;
 		}
 
 		public static object Nth(object[] args) {

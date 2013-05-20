@@ -13,6 +13,7 @@ namespace SharpLisp
 		int _letScopeCounter = 0;
 
 		Scope _globalScope;
+		Dictionary<string, SharpList> _macroDefinitions = new Dictionary<string, SharpList>();
 
 		public Environment ()
 		{
@@ -38,6 +39,7 @@ namespace SharpLisp
 			_globalScope.vars ["rest"] = new SharpFunction (BuiltInFunctions.Rest, "rest");
 			_globalScope.vars ["count"] = new SharpFunction (BuiltInFunctions.Count, "count");
 			_globalScope.vars ["cons"] = new SharpFunction (BuiltInFunctions.Cons, "cons");
+			_globalScope.vars ["list"] = new SharpFunction (BuiltInFunctions.List, "list");
 
 			_globalScope.vars ["load"] = new SharpFunction (LoadFile, "load");
 		}
@@ -82,6 +84,8 @@ namespace SharpLisp
 		}
 
 		public object Eval(object o, Scope pCurrentScope) {
+			//Console.WriteLine ("Eval: " + o); // + " in " + pCurrentScope.name);
+
 			object result = null;
 
 			if (o is SharpList) {
@@ -100,6 +104,15 @@ namespace SharpLisp
 		private object EvalList(SharpList pList, Scope pCurrentScope) {
 			if (pList.Count == 0) {
 				return pList;
+			}
+
+			if (pList[0] is SymbolToken) {
+				//Console.WriteLine ("Found symbol token " + pList[0]);
+				if (_macroDefinitions.ContainsKey (((SymbolToken)pList[0]).value)) {
+					SymbolToken macroName = pList [0] as SymbolToken;
+					object result = CallMacro (_macroDefinitions[macroName.value], pList, pCurrentScope);
+					return result;
+				}
 			}
 
 			object firstItem = GetEvaled (pList, 0, pCurrentScope);
@@ -127,8 +140,8 @@ namespace SharpLisp
 					return Conj (pList, pCurrentScope);
 				}
 
-				if (token.type == TokenType.MACRO) {
-					return Macro (pList, pCurrentScope);
+				if (token.type == TokenType.DEFMACRO) {
+					return DefMacro (pList, pCurrentScope);
 				}
 
 				if (token.type == TokenType.QUOTE) {
@@ -136,7 +149,7 @@ namespace SharpLisp
 				}
 					
 				throw new Exception("Can't understand ReservedToken: " + token);
-			} 
+			}
 
 			if (firstItem is SharpFunction) {
 				return FunctionCall (pList, pCurrentScope);
@@ -310,23 +323,93 @@ namespace SharpLisp
 			return deepCopy;
 		}
 
-		private object Macro(SharpList pList, Scope pCurrentScope) {
-			SharpVector argBindings = pList [1] as SharpVector;
-			if(argBindings == null) {
-				throw new Exception("The first argument to fn is not a vector of args");
+		private object DefMacro(SharpList pList, Scope pCurrentScope) {
+
+			SymbolToken macroNameSymbol = pList [1] as SymbolToken;
+			if (macroNameSymbol == null) {
+				throw new Exception("The first argument to macro is not a string");
 			}
 
-			SharpVector argBindingsDeepCopy = new SharpVector ();
-			foreach(var argBinding in argBindings) {
-				argBindingsDeepCopy.Add (argBinding);
+			_macroDefinitions[macroNameSymbol.value] = pList;
+
+			return pList;
+		}
+
+		private object CallMacro(SharpList pMacroForm, SharpList pInvokingList, Scope pCurrentScope) {
+
+			Console.WriteLine ("Calling macro");
+
+			SymbolToken macroNameSymbol = pMacroForm [1] as SymbolToken;
+			if (macroNameSymbol == null) {
+				throw new Exception("The first argument to macro is not a string");
 			}
 
-			SharpList body = new SharpList ();
-			for (int i = 2; i < pList.Count; i++) {
-				body.Add(pList[i]);
+			var argBindings = pMacroForm [2] as SharpVector;
+			if (argBindings == null) {
+				throw new Exception("The second argument to macro is not a vector of args");
 			}
 
-			return null;
+			List<object> args = new List<object> ();
+			for (int i = 1; i < pInvokingList.Count; i++) {
+				args.Add (pInvokingList[i]);
+			}
+
+			int argPos = 0;
+
+			Scope macroScope = new Scope ("Macro scope", pCurrentScope);
+		 	foreach(var argBinding in argBindings) {
+				
+				SymbolToken symbol = argBinding as SymbolToken;
+				if (symbol == null) {
+					throw new Exception ("One of the bindings to the macro is not a symbol");
+				}
+
+				macroScope.SetVar(symbol.value, args[argPos]);
+				Console.WriteLine ("Setting " + symbol.value + " to " + args[argPos] + " at arg pos " + argPos);
+
+				argPos++;
+			}
+
+			List<object> compiledForms = new List<object> ();
+
+			for(int i = 3; i < pMacroForm.Count; i++) {
+				object compiledBody = CompileMacro(pMacroForm [i], macroScope);
+				compiledForms.Add (compiledBody);
+			}
+
+			Console.WriteLine("Compiled macro " + macroNameSymbol.value + ": " + string.Join(",", compiledForms));
+
+			object lastResult = null;
+			foreach(var form in compiledForms) {
+				Console.WriteLine ("Eval form " + form.ToString());
+				lastResult = Eval (form, pCurrentScope);
+			}
+
+			return lastResult;
+		}
+
+		private object CompileMacro(object pBody, Scope pScope) {
+
+			string pre = pBody.ToString ();
+
+			object compiled = Eval (pBody, pScope);
+
+//			if (pBody is SymbolToken) {
+//
+//			} else if (pBody is SharpList) {
+//				compiled = new SharpList ();
+//				foreach (var expression in (pBody as SharpList)) {
+//
+//				}
+//			}
+//
+			string post = compiled.ToString ();
+
+			if (pre == post) {
+				return compiled;
+			} else {
+				return CompileMacro (compiled, pScope);
+			}
 		}
 
 		private object Quote(SharpList pList, Scope pCurrentScope) {

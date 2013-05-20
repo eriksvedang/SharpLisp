@@ -59,8 +59,8 @@ namespace SharpLisp
 						_tokens.Add (new ReservedToken(TokenType.IF));
 					} else if (text == "conj") {
 						_tokens.Add (new ReservedToken(TokenType.CONJ));
-					} else if (text == "macro") {
-						_tokens.Add (new ReservedToken(TokenType.MACRO));
+					} else if (text == "defmacro") {
+						_tokens.Add (new ReservedToken(TokenType.DEFMACRO));
 					} else if (text == "quote") {
 						_tokens.Add (new ReservedToken(TokenType.QUOTE));
 					} else if (text == "null") {

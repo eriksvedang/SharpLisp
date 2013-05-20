@@ -53,10 +53,7 @@ namespace SharpLisp
 			} else if (token.type == TokenType.LEFT_BRACKET) {
 				sexp = ReadVector ();
 			} else if (token.type == TokenType.TICK) {
-				sexp = new SharpList () {
-					new ReservedToken(TokenType.QUOTE),
-					Read (),
-				};
+				sexp = ReadQuoted ();
 			} else {
 				throw new Exception ("Can't understand token " + token);
 			}
@@ -114,6 +111,13 @@ namespace SharpLisp
 			return s;
 		}
 
+		SharpList ReadQuoted ()
+		{
+			return new SharpList () {
+				new ReservedToken (TokenType.QUOTE),
+				Read (),
+			};
+		}
 	}
 }
 

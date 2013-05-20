@@ -16,7 +16,7 @@ namespace SharpLisp
 		LET,
 		IF,
 		CONJ,
-		MACRO,
+		DEFMACRO,
 		QUOTE,
 		NULL,
 		TICK,
