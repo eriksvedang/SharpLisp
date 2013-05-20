@@ -47,7 +47,13 @@ namespace SharpLisp
 					_tokens.Add (new FloatToken(ReadNr ()));
 				} else if (c == '\"') {
 					_tokens.Add (new StringToken(ReadString ()));
-				} else if (IsChar (c)) {
+				} else if (c == '&') {
+					_tokens.Add (new ReservedToken(TokenType.AMPERSAND));
+					Step ();
+				} else if (IsStrangeSymbol(c)) {
+					_tokens.Add (new SymbolToken(c.ToString()));
+					Step ();
+				} else if (IsFirstChar (c)) {
 					string text = ReadText ();
 					if (text == "def") {
 						_tokens.Add (new ReservedToken(TokenType.DEF));
@@ -96,14 +102,14 @@ namespace SharpLisp
 		}
 
 		bool IsNumber(char c) {
-			return "1234567890.".Contains (c.ToString());
+			return "1234567890".Contains (c.ToString());
 		}
 
 		float ReadNr() {
 			string s = "";
 			while (MoreToRead()) {
 				char c = ReadCurrentChar ();
-				if (IsNumber (c)) {
+				if (!IsWhitespace (c) && c != ')' && c != ']') {
 					s += c;
 					Step ();
 				} else {
@@ -113,8 +119,16 @@ namespace SharpLisp
 			return Convert.ToSingle (s);
 		}
 
+		bool IsFirstChar(char c) {
+			return "abcdefghijklmnopqrstuvwxyz".Contains (c.ToString().ToLower());
+		}
+
+		bool IsStrangeSymbol(char c) {
+			return "_+-*/@#?!%=<>.,;:".Contains (c.ToString().ToLower());
+		}
+
 		bool IsChar(char c) {
-			return "abcdefghijklmnopqrstuvwxyz_+-*/@#&?!%=<>.,;:".Contains (c.ToString().ToLower());
+			return "abcdefghijklmnopqrstuvwxyz_+-*/@#&?!%=<>.,;:1234567890".Contains (c.ToString().ToLower());
 		}
 
 		string ReadText() {

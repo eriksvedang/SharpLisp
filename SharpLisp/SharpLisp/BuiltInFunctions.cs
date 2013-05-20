@@ -6,6 +6,32 @@ namespace SharpLisp
 {
 	public class BuiltInFunctions
 	{
+		static List<Module> s_modules;
+
+		static void LoadModules()
+		{
+			s_modules = new List<Module>();
+
+			var callingAssembly = Assembly.GetCallingAssembly ();
+			s_modules.AddRange(callingAssembly.GetLoadedModules ());
+
+//			var executingAssembly = Assembly.GetExecutingAssembly ();
+//			modules.AddRange (executingAssembly.GetLoadedModules());
+//
+//			var entryAssembly = Assembly.GetEntryAssembly ();
+//			modules.AddRange (entryAssembly.GetLoadedModules());
+
+			AssemblyName[] names = callingAssembly.GetReferencedAssemblies ();
+			//Console.WriteLine ("Referenced assemblies: " + string.Join<AssemblyName>(", ", names));
+
+			foreach(var name in names) {
+				Assembly assembly = Assembly.Load(name);
+				s_modules.AddRange (assembly.GetLoadedModules());
+			}
+
+			//Console.WriteLine ("Loaded modules: " + string.Join<Module>(", ", s_modules));
+		}
+
 		public static object Interop(object[] args) {
 
 			SymbolToken typeName = (SymbolToken)args [0];
@@ -15,33 +41,48 @@ namespace SharpLisp
 			for (int i = 2; i < args.Length; i++) {
 				remainingArgs.Add (args[i]);
 			}
+	
+			if (s_modules == null) {
+				LoadModules ();
+			}
 
-			var assembly = Assembly.GetCallingAssembly ();
-			var modules = assembly.GetLoadedModules ();
-
-//			Console.WriteLine ("Loaded modules: " + string.Join<Module>(", ", modules));
-
-			foreach(var module in modules) {
+			foreach(var module in s_modules) {
 
 //				Console.WriteLine ("Loaded methods: " + string.Join<MethodInfo>(", ", module.GetMethods()));
 //				Console.WriteLine ("Loaded types: " + string.Join<Type>(", ", module.GetTypes()));
 
 				Type type = module.GetType (typeName.value);
 
-				if(type == null) {
+				if (type == null) {
 					continue;
-				}
+				} else {
+					//Console.WriteLine ("Found type " + type + " in module " + module);
+				}			
 
 //				Console.WriteLine ("Methods: " + string.Join<MethodInfo>(", ", type.GetMethods()));
 //				Console.WriteLine ("Fields: " + string.Join<FieldInfo>(", ", type.GetFields()));
 
 				var methodInfo = type.GetMethod (methodName.value);
-				object result = methodInfo.Invoke(null, remainingArgs.ToArray());
+				var propertyInfo = type.GetProperty (methodName.value);
+
+				object result = null;
+
+				if (methodInfo != null) {
+					result = methodInfo.Invoke (null, remainingArgs.ToArray ());
+				} else if (propertyInfo != null) {
+					result = propertyInfo.GetValue (null, null);
+				} else {
+					throw new Exception("Can't find method or property " + methodName.value);
+				}
 
 				return result;
 			}
 
 			throw new Exception ("Can't find type " + typeName); 
+		}
+
+		public static object Type(object[] args) {
+			return args [0].GetType ();
 		}
 
 		public static object IsEmpty(object[] args) {

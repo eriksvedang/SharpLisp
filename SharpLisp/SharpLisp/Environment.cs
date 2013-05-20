@@ -1,3 +1,5 @@
+//#define MACRODEBUG
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +13,7 @@ namespace SharpLisp
 		int _closureCounter = 0;
 		int _functionCallScopeCounter = 0;
 		int _letScopeCounter = 0;
+		int _macroScopeCounter = 0;
 
 		Scope _globalScope;
 		Dictionary<string, SharpList> _macroDefinitions = new Dictionary<string, SharpList>();
@@ -33,7 +36,7 @@ namespace SharpLisp
 			_globalScope.vars ["<="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a <= b), "<=");
 			_globalScope.vars [">="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a >= b), ">=");
 			_globalScope.vars ["mod"] = new SharpFunction (BuiltInFunctions.Modulus, "mod");
-			_globalScope.vars ["i"] = new SharpFunction (BuiltInFunctions.Interop, "i");
+			_globalScope.vars ["."] = new SharpFunction (BuiltInFunctions.Interop, ".");
 
 			_globalScope.vars ["empty?"] = new SharpFunction (BuiltInFunctions.IsEmpty, "empty?");
 			_globalScope.vars ["nth"] = new SharpFunction (BuiltInFunctions.Nth, "nth");
@@ -44,6 +47,7 @@ namespace SharpLisp
 			_globalScope.vars ["list"] = new SharpFunction (BuiltInFunctions.List, "list");
 
 			_globalScope.vars ["load"] = new SharpFunction (LoadFile, "load");
+			_globalScope.vars ["type"] = new SharpFunction (BuiltInFunctions.Type, "type");
 		}
 
 		private List<object> StringToExpressions(string pString) {
@@ -58,7 +62,7 @@ namespace SharpLisp
 
 		public void ReadEval(string pString, bool pPrint)
 		{
-			try { 
+			try {
 				List<object> rootExpressions = StringToExpressions(pString);
 
 				foreach(object sexp in rootExpressions) {
@@ -258,11 +262,31 @@ namespace SharpLisp
 #endif
 
 				int argPos = 0;
-				foreach(var argBinding in argBindingsDeepCopy) {
+
+				for(int argBindingPos = 0; argBindingPos < argBindingsDeepCopy.Count; argBindingPos++) {
+					var argBinding = argBindingsDeepCopy[argBindingPos];
+
+					if(argBinding is ReservedToken && (argBinding as ReservedToken).type == TokenType.AMPERSAND) {
+						argBindingPos++;
+						SymbolToken finalSymbol = argBindingsDeepCopy[argBindingPos] as SymbolToken;
+
+						if(finalSymbol == null) {
+							throw new Exception("Final arg binding after ampersand is not a symbol: " + argBindingsDeepCopy[argBindingPos]);
+						}
+
+						var restOfArgs = new SharpList ();
+						while (argPos < args.Length) {
+							restOfArgs.Add(args[argPos++]);
+						}
+						functionCallScope.SetVar(finalSymbol.value, restOfArgs);
+						break;
+					}
+
 					SymbolToken symbol = argBinding as SymbolToken;
 					if(symbol == null) {
 						throw new Exception("Arg binding is not a symbol: " + symbol);
 					}
+
 					functionCallScope.SetVar(symbol.value, args[argPos++]);
 				}
 
@@ -370,9 +394,28 @@ namespace SharpLisp
 
 			int argPos = 0;
 
-			Scope macroScope = new Scope ("Macro scope", pCurrentScope);
-		 	foreach(var argBinding in argBindings) {
-				
+			Scope macroScope = new Scope ("Macro scope " + _macroScopeCounter++, pCurrentScope);
+
+			for(int argBindingPos = 0; argBindingPos < argBindings.Count; argBindingPos++) {
+
+				var argBinding = argBindings [argBindingPos];
+
+				if(argBinding is ReservedToken && (argBinding as ReservedToken).type == TokenType.AMPERSAND) {
+					argBindingPos++;
+					SymbolToken finalSymbol = argBindings[argBindingPos] as SymbolToken;
+
+					if(finalSymbol == null) {
+						throw new Exception("Final arg binding after ampersand is not a symbol: " + argBindings[argBindingPos]);
+					}
+
+					var restOfArgs = new SharpList ();
+					while (argPos < args.Count) {
+						restOfArgs.Add(args[argPos++]);
+					}
+					macroScope.SetVar(finalSymbol.value, restOfArgs);
+					break;
+				}
+
 				SymbolToken symbol = argBinding as SymbolToken;
 				if (symbol == null) {
 					throw new Exception ("One of the bindings to the macro is not a symbol");

@@ -21,6 +21,7 @@ namespace SharpLisp
 		NULL,
 		TICK,
 		SET,
+		AMPERSAND,
 	};
 
 	public class Token
