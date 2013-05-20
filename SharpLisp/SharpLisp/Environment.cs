@@ -19,6 +19,8 @@ namespace SharpLisp
 		{
 			_globalScope = new Scope ("Global", null);
 
+			_globalScope.vars ["eval"] = new SharpFunction (InternalEval, "eval");
+
 			_globalScope.vars ["print"] = new SharpFunction (BuiltInFunctions.VariadicPrint, "print");
 
 			_globalScope.vars ["+"] = new SharpFunction (BuiltInFunctions.VariadicAdd, "+");
@@ -81,6 +83,14 @@ namespace SharpLisp
 			ReadEval (sr.ReadToEnd(), false);
 			sr.Close ();
 			return null;
+		}
+
+		object InternalEval(object[] args) {
+			object lastResult = null;
+			foreach(object arg in args) {
+				lastResult = Eval (arg, _globalScope);
+			}
+			return lastResult;
 		}
 
 		public object Eval(object o, Scope pCurrentScope) {
@@ -365,7 +375,9 @@ namespace SharpLisp
 				}
 
 				macroScope.SetVar(symbol.value, args[argPos]);
-				//Console.WriteLine ("Setting " + symbol.value + " to " + args[argPos] + " at arg pos " + argPos);
+#if MACRODEBUG
+				Console.WriteLine ("Setting " + symbol.value + " to " + args[argPos] + " at arg pos " + argPos);
+#endif
 
 				argPos++;
 			}
@@ -377,7 +389,9 @@ namespace SharpLisp
 				compiledForms.Add (compiledBody);
 			}
 
-			//Console.WriteLine("Compiled macro " + macroNameSymbol.value + ": " + string.Join(",", compiledForms));
+#if MACRODEBUG
+			Console.WriteLine("Compiled macro " + macroNameSymbol.value + ": " + string.Join(",", compiledForms));
+#endif
 
 			object lastResult = null;
 			foreach(var form in compiledForms) {
@@ -394,7 +408,9 @@ namespace SharpLisp
 			object compiled = Eval (pBody, pScope);
 			string post = compiled.ToString ();
 
-			//Console.WriteLine ("Compiled " + pre + " to " + post);
+#if MACRODEBUG
+			Console.WriteLine ("Compiled " + pre + " to " + post);
+#endif
 
 			if (pre == post) {
 				return compiled;
