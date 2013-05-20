@@ -337,12 +337,12 @@ namespace SharpLisp
 
 		private object CallMacro(SharpList pMacroForm, SharpList pInvokingList, Scope pCurrentScope) {
 
-			Console.WriteLine ("Calling macro");
-
 			SymbolToken macroNameSymbol = pMacroForm [1] as SymbolToken;
 			if (macroNameSymbol == null) {
 				throw new Exception("The first argument to macro is not a string");
 			}
+
+			//Console.WriteLine ("Calling macro " + macroNameSymbol.value);
 
 			var argBindings = pMacroForm [2] as SharpVector;
 			if (argBindings == null) {
@@ -365,7 +365,7 @@ namespace SharpLisp
 				}
 
 				macroScope.SetVar(symbol.value, args[argPos]);
-				Console.WriteLine ("Setting " + symbol.value + " to " + args[argPos] + " at arg pos " + argPos);
+				//Console.WriteLine ("Setting " + symbol.value + " to " + args[argPos] + " at arg pos " + argPos);
 
 				argPos++;
 			}
@@ -377,11 +377,11 @@ namespace SharpLisp
 				compiledForms.Add (compiledBody);
 			}
 
-			Console.WriteLine("Compiled macro " + macroNameSymbol.value + ": " + string.Join(",", compiledForms));
+			//Console.WriteLine("Compiled macro " + macroNameSymbol.value + ": " + string.Join(",", compiledForms));
 
 			object lastResult = null;
 			foreach(var form in compiledForms) {
-				Console.WriteLine ("Eval form " + form.ToString());
+				//Console.WriteLine ("Eval form " + form.ToString());
 				lastResult = Eval (form, pCurrentScope);
 			}
 
@@ -391,19 +391,10 @@ namespace SharpLisp
 		private object CompileMacro(object pBody, Scope pScope) {
 
 			string pre = pBody.ToString ();
-
 			object compiled = Eval (pBody, pScope);
-
-//			if (pBody is SymbolToken) {
-//
-//			} else if (pBody is SharpList) {
-//				compiled = new SharpList ();
-//				foreach (var expression in (pBody as SharpList)) {
-//
-//				}
-//			}
-//
 			string post = compiled.ToString ();
+
+			//Console.WriteLine ("Compiled " + pre + " to " + post);
 
 			if (pre == post) {
 				return compiled;
