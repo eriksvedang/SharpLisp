@@ -27,6 +27,17 @@ namespace SharpLisp
 			}
 		}
 
+		public Scope TryResolveScope (string symbolName)
+		{
+			if (vars.ContainsKey(symbolName)) {
+				return this;
+			} else if (enclosingScope != null) {
+				return enclosingScope.TryResolveScope (symbolName);
+			} else {
+				throw new Exception ("Can't resolve symbol " + symbolName);
+			}
+		}
+
 		public void SetVar(string pName, object pValue) {
 			vars [pName] = pValue;
 			//Console.WriteLine("Set " + pName + " in " + name + " to " + pValue);

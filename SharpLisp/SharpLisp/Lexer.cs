@@ -63,6 +63,8 @@ namespace SharpLisp
 						_tokens.Add (new ReservedToken(TokenType.DEFMACRO));
 					} else if (text == "quote") {
 						_tokens.Add (new ReservedToken(TokenType.QUOTE));
+					} else if (text == "set!") {
+						_tokens.Add (new ReservedToken(TokenType.SET));
 					} else if (text == "null") {
 						_tokens.Add (new NullToken());
 					} else if (text == "true") {

@@ -157,7 +157,11 @@ namespace SharpLisp
 				if (token.type == TokenType.QUOTE) {
 					return Quote (pList, pCurrentScope);
 				}
-					
+
+				if (token.type == TokenType.SET) {
+					return Set (pList, pCurrentScope);
+				}
+	
 				throw new Exception("Can't understand ReservedToken: " + token);
 			}
 
@@ -421,6 +425,13 @@ namespace SharpLisp
 
 		private object Quote(SharpList pList, Scope pCurrentScope) {
 			return pList [1];
+		}
+
+		public object Set(SharpList pList, Scope pCurrentScope) {
+			string symbolName = (pList [1] as SymbolToken).value;
+			Scope s = pCurrentScope.TryResolveScope (symbolName);
+			s.SetVar (symbolName, Eval(pList [2], pCurrentScope));
+			return s.vars[symbolName];
 		}
 	}
 }
