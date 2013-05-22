@@ -43,7 +43,10 @@ namespace SharpLisp
 			globalScope.vars ["<="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a <= b), "<=");
 			globalScope.vars [">="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a >= b), ">=");
 			globalScope.vars ["mod"] = new SharpFunction (BuiltInFunctions.Modulus, "mod");
-			globalScope.vars ["."] = new SharpFunction (BuiltInFunctions.Interop, ".");
+
+			globalScope.vars ["invoke-static"] = new SharpFunction (BuiltInFunctions.InvokeStatic, "invoke-static");
+			globalScope.vars ["."] = new SharpFunction (BuiltInFunctions.InvokeMember, ".");
+			globalScope.vars ["new"] = new SharpFunction (BuiltInFunctions.New, ".");
 
 			globalScope.vars ["seq"] = new SharpFunction (BuiltInFunctions.Seq, "seq");
 			globalScope.vars ["empty?"] = new SharpFunction (BuiltInFunctions.IsEmpty, "empty?");

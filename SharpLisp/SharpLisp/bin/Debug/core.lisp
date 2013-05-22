@@ -65,7 +65,7 @@
 	(let [counter start-value]
 		(fn [] (set! counter (inc counter)))))
 
-(defn time [] (i 'System.DateTime 'Now))
+(defn time [] (invoke-static 'System.DateTime 'Now))
 
 (defmacro test [expression]
 	(list 'if expression 
@@ -83,4 +83,5 @@
 (defn blob [x]
 	(print "Got " x))
 
+(def t (new 'SharpLisp.Tester 100))
 
