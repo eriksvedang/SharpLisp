@@ -435,7 +435,15 @@ namespace SharpLisp
 			}
 
 #if MACRODEBUG
-			Console.WriteLine("Compiled macro " + macroNameSymbol.value + ": " + string.Join(",", compiledForms));
+			Console.WriteLine("Compiled macro " + macroNameSymbol.value + " to the following forms: ");
+			foreach(var form in compiledForms) {
+				if(form != null) {
+					Console.WriteLine(form.ToString ());
+				}
+				else {
+					Console.WriteLine("null");
+				}
+			}
 #endif
 
 			object lastResult = null;
