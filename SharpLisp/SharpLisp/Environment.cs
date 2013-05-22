@@ -45,7 +45,7 @@ namespace SharpLisp
 			globalScope.vars ["mod"] = new SharpFunction (BuiltInFunctions.Modulus, "mod");
 
 			globalScope.vars ["invoke-static"] = new SharpFunction (BuiltInFunctions.InvokeStatic, "invoke-static");
-			globalScope.vars ["."] = new SharpFunction (BuiltInFunctions.InvokeMember, ".");
+			globalScope.vars ["invoke-member"] = new SharpFunction (BuiltInFunctions.InvokeMember, "invoke-member");
 			globalScope.vars ["new"] = new SharpFunction (BuiltInFunctions.New, ".");
 
 			globalScope.vars ["seq"] = new SharpFunction (BuiltInFunctions.Seq, "seq");
@@ -473,10 +473,6 @@ namespace SharpLisp
 			Scope s = pCurrentScope.TryResolveScope (symbolName);
 			s.SetVar (symbolName, Eval(pList [2], pCurrentScope));
 			return s.vars[symbolName];
-
-//			object o = pList [1];
-//			o = Eval (pList[2], pCurrentScope);
-//			return pList
 		}
 
 		private object VariadicPrint(object[] args) {

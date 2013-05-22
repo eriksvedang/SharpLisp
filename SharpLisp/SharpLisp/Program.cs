@@ -38,5 +38,9 @@ namespace SharpLisp
 		public static float Foo(float x) {
 			return 10 * x;
 		}
+
+		public float GetX() {
+			return x;
+		}
 	}
 }

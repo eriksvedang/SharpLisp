@@ -61,15 +61,15 @@ namespace SharpLisp
 
 		public static object InvokeMember(object[] args) {
 
-			object o = args [0];
-			SymbolToken methodName = (SymbolToken)args [1];
+			SymbolToken methodName = (SymbolToken)args [0];
+			object targetObject = args [1];
 
 			List<object> remainingArgs = new List<object> ();
 			for (int i = 2; i < args.Length; i++) {
 				remainingArgs.Add (args[i]);
 			}
 
-			Type type = o.GetType ();
+			Type type = targetObject.GetType ();
 
 			var methodInfo = type.GetMethod (methodName.value);
 			var propertyInfo = type.GetProperty (methodName.value);
@@ -78,11 +78,11 @@ namespace SharpLisp
 			object result = null;
 
 			if (methodInfo != null) {
-				result = methodInfo.Invoke (o, remainingArgs.ToArray ());
+				result = methodInfo.Invoke (targetObject, remainingArgs.ToArray ());
 			} else if (propertyInfo != null) {
-				result = propertyInfo.GetValue (o, null);
+				result = propertyInfo.GetValue (targetObject, null);
 			} else if (fieldInfo != null) {
-				result = fieldInfo.GetValue (o);
+				result = fieldInfo.GetValue (targetObject);
 			} else {
 				throw new Exception("Can't find field, method or property " + methodName.value);
 			}

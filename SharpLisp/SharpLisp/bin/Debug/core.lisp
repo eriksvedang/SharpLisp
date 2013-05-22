@@ -80,3 +80,10 @@
 (defmacro -> [start-value & forms]
 	(wrap-functions start-value (reverse forms)))
 
+(def t (new 'SharpLisp.Tester 20))
+
+(defmacro . [function-name target-object & args]
+	(append 
+		(list 'invoke-member (quote function-name) target-object)
+		args))
+
