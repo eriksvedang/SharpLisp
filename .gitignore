@@ -1,1 +1,3 @@
-/SharpLisp/SharpLisp/bin
+.DS_Store
+*.exe
+*.mdb

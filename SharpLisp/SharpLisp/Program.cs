@@ -14,7 +14,7 @@ namespace SharpLisp
 
 			Environment runner = new Environment ();
 
-			runner.LoadFile (new object[] { "core" });
+			runner.LoadFile (new object[] { "core.lisp" });
 
 			while (true) {
 				Console.Write ("=> ");
