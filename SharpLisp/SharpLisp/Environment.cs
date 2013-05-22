@@ -450,12 +450,9 @@ namespace SharpLisp
 		private object CompileMacro(object pBody, Scope pScope) {
 
 			string pre = pBody.ToString ();
-			object compiled = null;
+			object compiled = Eval (pBody, pScope);
 
-			try {
-				compiled = Eval (pBody, pScope);
-			} 
-			catch (Exception e) {
+			if (compiled == null) {
 				errorFunction ("Got error " + e + " when compiling the following macro form: " + pre);
 			}
 
