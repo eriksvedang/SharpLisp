@@ -2,7 +2,12 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
   <MonoDevelop.Ide.Workbench ActiveDocument="SharpLisp/Environment.cs">
     <Files>
-      <File FileName="SharpLisp/Environment.cs" Line="357" Column="32" />
+      <File FileName="SharpLisp/Environment.cs" Line="24" Column="4" />
+      <File FileName="SharpLisp/BuiltInFunctions.cs" Line="107" Column="5" />
+      <File FileName="SharpLisp/Token.cs" Line="17" Column="6" />
+      <File FileName="SharpLisp/Lexer.cs" Line="71" Column="30" />
+      <File FileName="SharpLisp/ISeq.cs" Line="11" Column="29" />
+      <File FileName="SharpLisp/SharpList.cs" Line="60" Column="4" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
