@@ -235,19 +235,6 @@ namespace SharpLisp
 			return true;
 		}
 
-		public static object VariadicPrint(object[] args) {
-			System.Text.StringBuilder concat = new System.Text.StringBuilder ();
-			foreach(var arg in args) {
-				if (arg == null) {
-					concat.Append("null");
-				} else {
-					concat.Append(arg);
-				}
-			}
-			Console.WriteLine (concat.ToString());
-			return null;
-		}
-
 		public static void AssertArgumentCount(int pNr, object[] args) {
 			if (pNr != args.Length) {
 				throw new Exception ("Wrong nr of arguments to function");

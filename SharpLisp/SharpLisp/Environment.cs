@@ -9,6 +9,8 @@ namespace SharpLisp
 {
 	public class Environment
 	{
+		public delegate void PrintDelegate(string pText);
+
 		int _functionCounter = 0;
 		int _closureCounter = 0;
 		int _functionCallScopeCounter = 0;
@@ -18,13 +20,15 @@ namespace SharpLisp
 		Scope _globalScope;
 		Dictionary<string, SharpList> _macroDefinitions = new Dictionary<string, SharpList>();
 
+		PrintDelegate _printFunction = Console.WriteLine;
+
 		public Environment ()
 		{
 			_globalScope = new Scope ("Global", null);
 
 			_globalScope.vars ["eval"] = new SharpFunction (InternalEval, "eval");
 
-			_globalScope.vars ["print"] = new SharpFunction (BuiltInFunctions.VariadicPrint, "print");
+			_globalScope.vars ["print"] = new SharpFunction (VariadicPrint, "print");
 			_globalScope.vars ["throw"] = new SharpFunction (BuiltInFunctions.Throw, "throw");
 
 			_globalScope.vars ["+"] = new SharpFunction (BuiltInFunctions.VariadicAdd, "+");
@@ -460,6 +464,23 @@ namespace SharpLisp
 			Scope s = pCurrentScope.TryResolveScope (symbolName);
 			s.SetVar (symbolName, Eval(pList [2], pCurrentScope));
 			return s.vars[symbolName];
+		}
+
+		private object VariadicPrint(object[] args) {
+			System.Text.StringBuilder concat = new System.Text.StringBuilder ();
+			foreach(var arg in args) {
+				if (arg == null) {
+					concat.Append("null");
+				} else {
+					concat.Append(arg);
+				}
+			}
+			_printFunction (concat.ToString());
+			return null;
+		}
+
+		public void SetPrintFunction(PrintDelegate pPrintFunction) {
+			_printFunction = pPrintFunction;
 		}
 	}
 }
