@@ -17,7 +17,7 @@ namespace SharpLisp
 		int _letScopeCounter = 0;
 		int _macroScopeCounter = 0;
 
-		Scope _globalScope;
+		public Scope globalScope;
 		Dictionary<string, SharpList> _macroDefinitions = new Dictionary<string, SharpList>();
 
 		public PrintDelegate printFunction = Console.WriteLine;
@@ -26,37 +26,37 @@ namespace SharpLisp
 
 		public Environment ()
 		{
-			_globalScope = new Scope ("Global", null);
+			globalScope = new Scope ("Global", null);
 
-			_globalScope.vars ["eval"] = new SharpFunction (InternalEval, "eval");
+			globalScope.vars ["eval"] = new SharpFunction (InternalEval, "eval");
 
-			_globalScope.vars ["print"] = new SharpFunction (VariadicPrint, "print");
-			_globalScope.vars ["throw"] = new SharpFunction (BuiltInFunctions.Throw, "throw");
+			globalScope.vars ["print"] = new SharpFunction (VariadicPrint, "print");
+			globalScope.vars ["throw"] = new SharpFunction (BuiltInFunctions.Throw, "throw");
 
-			_globalScope.vars ["+"] = new SharpFunction (BuiltInFunctions.VariadicAdd, "+");
-			_globalScope.vars ["*"] = new SharpFunction (BuiltInFunctions.VariadicMultiplication, "*");
-			_globalScope.vars ["-"] = new SharpFunction (BuiltInFunctions.VariadicSubtraction, "-");
-			_globalScope.vars ["/"] = new SharpFunction (BuiltInFunctions.VariadicDivision, "/");
-			_globalScope.vars ["="] = new SharpFunction (BuiltInFunctions.VariadicEqual, "=");
-			_globalScope.vars [">"] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a > b), ">");
-			_globalScope.vars ["<"] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a < b), "<");
-			_globalScope.vars ["<="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a <= b), "<=");
-			_globalScope.vars [">="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a >= b), ">=");
-			_globalScope.vars ["mod"] = new SharpFunction (BuiltInFunctions.Modulus, "mod");
-			_globalScope.vars ["."] = new SharpFunction (BuiltInFunctions.Interop, ".");
+			globalScope.vars ["+"] = new SharpFunction (BuiltInFunctions.VariadicAdd, "+");
+			globalScope.vars ["*"] = new SharpFunction (BuiltInFunctions.VariadicMultiplication, "*");
+			globalScope.vars ["-"] = new SharpFunction (BuiltInFunctions.VariadicSubtraction, "-");
+			globalScope.vars ["/"] = new SharpFunction (BuiltInFunctions.VariadicDivision, "/");
+			globalScope.vars ["="] = new SharpFunction (BuiltInFunctions.VariadicEqual, "=");
+			globalScope.vars [">"] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a > b), ">");
+			globalScope.vars ["<"] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a < b), "<");
+			globalScope.vars ["<="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a <= b), "<=");
+			globalScope.vars [">="] = new SharpFunction (BuiltInFunctions.VariadicCheck((a, b) => a >= b), ">=");
+			globalScope.vars ["mod"] = new SharpFunction (BuiltInFunctions.Modulus, "mod");
+			globalScope.vars ["."] = new SharpFunction (BuiltInFunctions.Interop, ".");
 
-			_globalScope.vars ["seq"] = new SharpFunction (BuiltInFunctions.Seq, "seq");
-			_globalScope.vars ["empty?"] = new SharpFunction (BuiltInFunctions.IsEmpty, "empty?");
-			_globalScope.vars ["nth"] = new SharpFunction (BuiltInFunctions.Nth, "nth");
-			_globalScope.vars ["first"] = new SharpFunction (BuiltInFunctions.First, "first");
-			_globalScope.vars ["rest"] = new SharpFunction (BuiltInFunctions.Rest, "rest");
-			_globalScope.vars ["count"] = new SharpFunction (BuiltInFunctions.Count, "count");
-			_globalScope.vars ["cons"] = new SharpFunction (BuiltInFunctions.Cons, "cons");
-			_globalScope.vars ["conj"] = new SharpFunction (BuiltInFunctions.Conj, "conj");
-			_globalScope.vars ["list"] = new SharpFunction (BuiltInFunctions.List, "list");
+			globalScope.vars ["seq"] = new SharpFunction (BuiltInFunctions.Seq, "seq");
+			globalScope.vars ["empty?"] = new SharpFunction (BuiltInFunctions.IsEmpty, "empty?");
+			globalScope.vars ["nth"] = new SharpFunction (BuiltInFunctions.Nth, "nth");
+			globalScope.vars ["first"] = new SharpFunction (BuiltInFunctions.First, "first");
+			globalScope.vars ["rest"] = new SharpFunction (BuiltInFunctions.Rest, "rest");
+			globalScope.vars ["count"] = new SharpFunction (BuiltInFunctions.Count, "count");
+			globalScope.vars ["cons"] = new SharpFunction (BuiltInFunctions.Cons, "cons");
+			globalScope.vars ["conj"] = new SharpFunction (BuiltInFunctions.Conj, "conj");
+			globalScope.vars ["list"] = new SharpFunction (BuiltInFunctions.List, "list");
 
-			_globalScope.vars ["load"] = new SharpFunction (LoadFile, "load");
-			_globalScope.vars ["type"] = new SharpFunction (BuiltInFunctions.Type, "type");
+			globalScope.vars ["load"] = new SharpFunction (LoadFile, "load");
+			globalScope.vars ["type"] = new SharpFunction (BuiltInFunctions.Type, "type");
 		}
 
 		private List<object> StringToExpressions(string pString) {
@@ -75,7 +75,7 @@ namespace SharpLisp
 				List<object> rootExpressions = StringToExpressions(pString);
 
 				foreach(object sexp in rootExpressions) {
-					object result = Eval (sexp, _globalScope);
+					object result = Eval (sexp, globalScope);
 					if(pPrint) {
 						if(result != null) {
 							evalOutputFunction (result.ToString());
@@ -101,13 +101,13 @@ namespace SharpLisp
 		object InternalEval(object[] args) {
 			object lastResult = null;
 			foreach(object arg in args) {
-				lastResult = Eval (arg, _globalScope);
+				lastResult = Eval (arg, globalScope);
 			}
 			return lastResult;
 		}
 
 		public object EvalInGlobalScope(object o) {
-			return Eval (o, _globalScope);
+			return Eval (o, globalScope);
 		}
 
 		private object Eval(object o, Scope pCurrentScope) {
@@ -204,7 +204,7 @@ namespace SharpLisp
 			if(symbolToken == null) {
 				throw new Exception("The first argument to def is not a symbol");
 			}
-			_globalScope.SetVar(symbolToken.value, GetEvaled(pList, 2, pCurrentScope));
+			globalScope.SetVar(symbolToken.value, GetEvaled(pList, 2, pCurrentScope));
 			return symbolToken;
 		}
 
