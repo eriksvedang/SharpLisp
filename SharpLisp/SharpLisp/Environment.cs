@@ -455,7 +455,7 @@ namespace SharpLisp
 			return pList [1];
 		}
 
-		public object Set(SharpList pList, Scope pCurrentScope) {
+		private object Set(SharpList pList, Scope pCurrentScope) {
 			string symbolName = (pList [1] as SymbolToken).value;
 			Scope s = pCurrentScope.TryResolveScope (symbolName);
 			s.SetVar (symbolName, Eval(pList [2], pCurrentScope));
