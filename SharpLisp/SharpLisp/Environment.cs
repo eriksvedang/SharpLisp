@@ -20,7 +20,9 @@ namespace SharpLisp
 		Scope _globalScope;
 		Dictionary<string, SharpList> _macroDefinitions = new Dictionary<string, SharpList>();
 
-		PrintDelegate _printFunction = Console.WriteLine;
+		public PrintDelegate _printFunction = Console.WriteLine;
+		public PrintDelegate _evalOutputFunction = Console.WriteLine;
+		public PrintDelegate _errorFunction = Console.WriteLine;
 
 		public Environment ()
 		{
@@ -76,15 +78,15 @@ namespace SharpLisp
 					object result = Eval (sexp, _globalScope);
 					if(pPrint) {
 						if(result != null) {
-							Console.WriteLine (result);
+							_evalOutputFunction (result);
 						} else {
-							Console.WriteLine ("null");
+							_evalOutputFunction ("null");
 						}
 					}
 				}
 			}
 			catch(Exception e) {
-				Console.WriteLine ("Error: " + e.ToString());
+				_errorFunction ("Error: " + e.ToString());
 			}
 		}
 
@@ -477,10 +479,6 @@ namespace SharpLisp
 			}
 			_printFunction (concat.ToString());
 			return null;
-		}
-
-		public void SetPrintFunction(PrintDelegate pPrintFunction) {
-			_printFunction = pPrintFunction;
 		}
 	}
 }
