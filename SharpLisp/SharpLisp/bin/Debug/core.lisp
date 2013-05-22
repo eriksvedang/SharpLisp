@@ -84,6 +84,6 @@
 
 (defmacro . [function-name target-object & args]
 	(append 
-		(list 'invoke-member (quote function-name) target-object)
+		(list 'invoke-member function-name target-object)
 		args))
 
