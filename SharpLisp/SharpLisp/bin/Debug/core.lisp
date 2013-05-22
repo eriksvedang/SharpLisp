@@ -80,6 +80,7 @@
 (defmacro -> [start-value & forms]
 	(wrap-functions start-value (reverse forms)))
 
-
+(defn blob [x]
+	(print "Got " x))
 
 

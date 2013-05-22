@@ -86,7 +86,7 @@ namespace SharpLisp
 				}
 			}
 			catch(Exception e) {
-				errorFunction ("Error: " + e.ToString());
+				errorFunction (e.ToString());
 			}
 		}
 
@@ -106,7 +106,11 @@ namespace SharpLisp
 			return lastResult;
 		}
 
-		public object Eval(object o, Scope pCurrentScope) {
+		public object EvalInGlobalScope(object o) {
+			return Eval (o, _globalScope);
+		}
+
+		private object Eval(object o, Scope pCurrentScope) {
 			//Console.WriteLine ("Eval: " + o); // + " in " + pCurrentScope.name);
 
 			object result = null;
