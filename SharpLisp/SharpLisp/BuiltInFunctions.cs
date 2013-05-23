@@ -74,6 +74,11 @@ namespace SharpLisp
 
 			Type type = targetObject.GetType ();
 
+			Console.WriteLine ("Trying to find function " + methodName.value + " with args of type:");
+			foreach (var argType in argTypes) {
+				Console.WriteLine(" - " + argType.ToString());
+			}
+
 			var methodInfo = type.GetMethod (methodName.value, argTypes.ToArray());
 			var propertyInfo = type.GetProperty (methodName.value);
 			var fieldInfo = type.GetField (methodName.value);
