@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SharpLisp
 {
@@ -78,7 +79,8 @@ namespace SharpLisp
 			object result = null;
 
 			if (methodInfo != null) {
-				result = methodInfo.Invoke (targetObject, remainingArgs.ToArray ());
+				result = methodInfo.Invoke (targetObject, BindingFlags.Default, null, remainingArgs.ToArray (), Thread.CurrentThread.CurrentCulture);
+				//result = methodInfo.Invoke (targetObject, remainingArgs.ToArray ());
 			} else if (propertyInfo != null) {
 				result = propertyInfo.GetValue (targetObject, null);
 			} else if (fieldInfo != null) {
