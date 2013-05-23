@@ -457,7 +457,14 @@ namespace SharpLisp
 
 		private object CompileMacro(object pBody, Scope pScope) {
 
-			string pre = pBody.ToString ();
+			string pre = "";
+
+			if (pBody == null) {
+				pre = "null";
+			} else {
+				pre = pBody.ToString ();
+			}
+
 			object compiled = Eval (pBody, pScope);
 
 			string post = "";
