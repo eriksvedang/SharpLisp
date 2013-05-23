@@ -460,11 +460,13 @@ namespace SharpLisp
 			string pre = pBody.ToString ();
 			object compiled = Eval (pBody, pScope);
 
-			if (compiled == null) {
-				errorFunction ("The compiled form is null when compiling the following macro form: " + pre);
-			}
+			string post = "";
 
-			string post = compiled.ToString ();
+			if (compiled == null) {
+				post = "null";
+			} else {
+				post = compiled.ToString ();
+			}
 
 #if MACRODEBUG
 			Console.WriteLine ("Compiled " + pre + " to " + post);
