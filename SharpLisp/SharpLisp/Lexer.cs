@@ -43,8 +43,6 @@ namespace SharpLisp
 					while (MoreToRead() && ReadCurrentChar() != '\n') {
 						Step ();
 					}
-				} else if (IsNumber (c)) {
-					_tokens.Add (new FloatToken(ReadNr ()));
 				} else if (c == '\"') {
 					_tokens.Add (new StringToken(ReadString ()));
 				} else if (c == '&') {
@@ -55,7 +53,9 @@ namespace SharpLisp
 					Step ();
 				} else if(CharCanBeginSymbol (c)) {
 					string text = ReadText ();
-					if (text == "def") {
+					if(IsNumber(text)) {
+						_tokens.Add (new FloatToken(Convert.ToSingle(text)));
+					} else if (text == "def") {
 						_tokens.Add (new ReservedToken(TokenType.DEF));
 					} else if (text == "fn") {
 						_tokens.Add (new ReservedToken(TokenType.FN));
@@ -100,8 +100,33 @@ namespace SharpLisp
 			return _readPosition < _stringToRead.Length;
 		}
 
-		bool IsNumber(char c) {
-			return "1234567890".Contains (c.ToString());
+		bool IsNumber(string pText) {
+			bool skipFirstSign = false;
+			if (pText[0] == '-') {
+				skipFirstSign = true;
+				if (pText.Length == 1) {
+					return false;
+				}
+			}
+
+			bool hasHitPeriod = false;
+			foreach(var c in pText) {
+				if (skipFirstSign) {
+					skipFirstSign = false;
+					continue;
+				}
+				if (c == '.') {
+					if(hasHitPeriod) {
+						return false;
+					} else {
+						hasHitPeriod = true;
+					}
+				}
+				if (!("1234567890.".Contains (c.ToString()))) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 		float ReadNr() {
@@ -119,7 +144,7 @@ namespace SharpLisp
 		}
 
 		bool CharCanBeginSymbol(char c) {
-			return "abcdefghijklmnopqrstuvwxyz_+-*/<>?!%=".Contains (c.ToString().ToLower());
+			return "abcdefghijklmnopqrstuvwxyz_+-*/<>?!%=1234567890-".Contains (c.ToString().ToLower());
 		}
 
 		bool IsChar(char c) {
