@@ -66,21 +66,22 @@ namespace SharpLisp
 			object targetObject = args [1];
 
 			List<object> remainingArgs = new List<object> ();
+			List<Type> argTypes = new List<Type>();
 			for (int i = 2; i < args.Length; i++) {
 				remainingArgs.Add (args[i]);
+				argTypes.Add(args[i].GetType());
 			}
 
 			Type type = targetObject.GetType ();
 
-			var methodInfo = type.GetMethod (methodName.value);
+			var methodInfo = type.GetMethod (methodName.value, argTypes.ToArray());
 			var propertyInfo = type.GetProperty (methodName.value);
 			var fieldInfo = type.GetField (methodName.value);
 
 			object result = null;
 
 			if (methodInfo != null) {
-				result = methodInfo.Invoke (targetObject, BindingFlags.Default, null, remainingArgs.ToArray (), Thread.CurrentThread.CurrentCulture);
-				//result = methodInfo.Invoke (targetObject, remainingArgs.ToArray ());
+				result = methodInfo.Invoke (targetObject, remainingArgs.ToArray ());
 			} else if (propertyInfo != null) {
 				result = propertyInfo.GetValue (targetObject, null);
 			} else if (fieldInfo != null) {
