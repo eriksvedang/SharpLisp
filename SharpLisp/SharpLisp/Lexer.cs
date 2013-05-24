@@ -63,7 +63,7 @@ namespace SharpLisp
 				} else if (c == '.') {
 					newToken = new SymbolToken(c.ToString());
 					Step ();
-				} else if(CharCanBeginSymbol (c)) {
+				} else if(IsChar (c)) {
 					string text = ReadText ();
 					if(IsNumber(text)) {
 						newToken = new FloatToken(Convert.ToSingle(text));
@@ -162,12 +162,8 @@ namespace SharpLisp
 			return Convert.ToSingle (s);
 		}
 
-		bool CharCanBeginSymbol(char c) {
-			return "abcdefghijklmnopqrstuvwxyz_+-*/<>?!%=1234567890-".Contains (c.ToString().ToLower());
-		}
-
 		bool IsChar(char c) {
-			return "abcdefghijklmnopqrstuvwxyz_+-*/@#&?!%=<>.,;:1234567890".Contains (c.ToString().ToLower());
+			return "abcdefghijklmnopqrstuvwxyz_+-*/@#&?!%=<>.,;:1234567890§£$∞§|≈€".Contains (c.ToString().ToLower());
 		}
 
 		string ReadText() {
