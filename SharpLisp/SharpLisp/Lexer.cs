@@ -26,6 +26,9 @@ namespace SharpLisp
 
 				Token newToken = null;
 
+				int lineBeforeReading = _lineNr;
+				int positionBeforeReading = _positionOnLine;
+
 				if (c == '\n') {
 					_positionOnLine = 1;
 					_lineNr++;
@@ -93,8 +96,8 @@ namespace SharpLisp
 				}
 
 				if(newToken != null) {
-					newToken.line = _lineNr;
-					newToken.position = _positionOnLine;
+					newToken.line = lineBeforeReading;
+					newToken.position = positionBeforeReading;
 					_tokens.Add (newToken);
 				}
 			}

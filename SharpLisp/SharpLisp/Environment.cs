@@ -185,7 +185,9 @@ namespace SharpLisp
 				return FunctionCall (pList, pCurrentScope);
 			} 
 
-			throw new Exception ("Can't eval function with first item '" + firstItem + "' at line " + pList.line + " and position " + pList.position);
+			Error ("Can't eval function with first item '" + firstItem, pList);
+
+			return null;
 		}
 
 		object GetEvaled(SharpList pList, int pPosition, Scope pCurrentScope) {
@@ -202,10 +204,14 @@ namespace SharpLisp
 			return evaledVector;
 		}
 
+		private void Error(string pDescription, SharpList pList) {
+			throw new Exception (pDescription + " (line " + pList.line + " and position " + pList.position + ")");
+		}
+
 		private object Def(SharpList pList, Scope pCurrentScope) {
 			SymbolToken symbolToken = pList [1] as SymbolToken;
 			if(symbolToken == null) {
-				throw new Exception("The first argument to def is not a symbol (at line " + pList.line + " and position " + pList.position + ")");
+				Error ("The first argument to def is not a symbol", pList);
 			}
 			globalScope.SetVar(symbolToken.value, GetEvaled(pList, 2, pCurrentScope));
 			return symbolToken;
@@ -214,7 +220,7 @@ namespace SharpLisp
 		private object Let(SharpList pList, Scope pCurrentScope) {
 			SharpVector bindingsVector = pList [1] as SharpVector;
 			if(bindingsVector == null) {
-				throw new Exception("The first argument to let is not a bindings vector (at line " + pList.line + " and position " + pList.position + ")");
+				Error ("The first argument to let is not a bindings vector", pList);
 			}
 
 			Scope letScope = new Scope ("Let" + _letScopeCounter++, pCurrentScope);
@@ -225,7 +231,7 @@ namespace SharpLisp
 			for (int i = 0; i < bindingsVector.Count; i += 2) {
 				SymbolToken symbolToken = bindingsVector [i] as SymbolToken;
 				if(symbolToken == null) {
-					throw new Exception("The first argument to def is not a symbol");
+					Error("Argument " + (i).ToString() + " in let binding is not a symbol", pList);
 				}
 				letScope.SetVar (symbolToken.value, Eval (bindingsVector[i + 1], pCurrentScope));
 			}
@@ -246,7 +252,7 @@ namespace SharpLisp
 		private object Fn(SharpList pList, Scope pCurrentScope) {
 			SharpVector argBindings = pList [1] as SharpVector;
 			if(argBindings == null) {
-				throw new Exception("The first argument to fn is not a vector of args");
+				Error ("The first argument to fn is not a vector of args", pList);
 			}
 
 			SharpVector argBindingsDeepCopy = new SharpVector ();
@@ -283,7 +289,7 @@ namespace SharpLisp
 						SymbolToken finalSymbol = argBindingsDeepCopy[argBindingPos] as SymbolToken;
 
 						if(finalSymbol == null) {
-							throw new Exception("Final arg binding after ampersand is not a symbol: " + argBindingsDeepCopy[argBindingPos]);
+							Error ("Final arg binding after ampersand is not a symbol: " + argBindingsDeepCopy[argBindingPos], pList);
 						}
 
 						var restOfArgs = new SharpList ();
@@ -296,7 +302,7 @@ namespace SharpLisp
 
 					SymbolToken symbol = argBinding as SymbolToken;
 					if(symbol == null) {
-						throw new Exception("Arg binding is not a symbol: " + symbol);
+						Error("Arg binding is not a symbol: " + symbol, pList);
 					}
 
 					functionCallScope.SetVar(symbol.value, args[argPos++]);
@@ -363,7 +369,7 @@ namespace SharpLisp
 
 			SymbolToken macroNameSymbol = pList [1] as SymbolToken;
 			if (macroNameSymbol == null) {
-				throw new Exception("The first argument to macro is not a string");
+				Error("The first argument to defmacro is not a string", pList);
 			}
 
 			_macroDefinitions[macroNameSymbol.value] = pList;
@@ -375,14 +381,14 @@ namespace SharpLisp
 
 			SymbolToken macroNameSymbol = pMacroForm [1] as SymbolToken;
 			if (macroNameSymbol == null) {
-				throw new Exception("The first argument to macro is not a string");
+				Error("The first argument to macro is not a string", pInvokingList);
 			}
 
 			//Console.WriteLine ("Calling macro " + macroNameSymbol.value);
 
 			var argBindings = pMacroForm [2] as SharpVector;
 			if (argBindings == null) {
-				throw new Exception("The second argument to macro is not a vector of args");
+				Error("The second argument to macro is not a vector of args", pInvokingList);
 			}
 
 			List<object> args = new List<object> ();
@@ -403,7 +409,7 @@ namespace SharpLisp
 					SymbolToken finalSymbol = argBindings[argBindingPos] as SymbolToken;
 
 					if(finalSymbol == null) {
-						throw new Exception("Final arg binding after ampersand is not a symbol: " + argBindings[argBindingPos]);
+						Error("Final arg binding after ampersand is not a symbol: " + argBindings[argBindingPos], pInvokingList);
 					}
 
 					var restOfArgs = new SharpList ();
@@ -416,7 +422,7 @@ namespace SharpLisp
 
 				SymbolToken symbol = argBinding as SymbolToken;
 				if (symbol == null) {
-					throw new Exception ("One of the bindings to the macro is not a symbol");
+					Error ("One of the bindings to the macro is not a symbol", pInvokingList);
 				}
 
 				macroScope.SetVar(symbol.value, args[argPos]);
