@@ -8,6 +8,8 @@ namespace SharpLisp
 		int _readPosition;
 		string _stringToRead;
 		List<Token> _tokens;
+		int _lineNr = 1;
+		int _positionOnLine = 1;
 
 		public Lexer ()
 		{
@@ -22,65 +24,78 @@ namespace SharpLisp
 			while(MoreToRead()) {
 				char c = ReadCurrentChar ();
 
-				if (IsWhitespace (c)) {
+				Token newToken = null;
+
+				if (c == '\n') {
+					_positionOnLine = 1;
+					_lineNr++;
+					Step ();
+				}
+				else if (IsWhitespace (c)) {
 					Step ();
 				} else if (c == '(') {
-					_tokens.Add (new Token(TokenType.LEFT_PAREN));
+					newToken = new Token (TokenType.LEFT_PAREN);
 					Step ();
 				} else if (c == ')') {
-					_tokens.Add (new Token(TokenType.RIGHT_PAREN));
+					newToken = new Token(TokenType.RIGHT_PAREN);
 					Step ();
 				} else if (c == '[') {
-					_tokens.Add (new Token(TokenType.LEFT_BRACKET));
+					newToken = new Token(TokenType.LEFT_BRACKET);
 					Step ();
 				} else if (c == ']') {
-					_tokens.Add (new Token(TokenType.RIGHT_BRACKET));
+					newToken = new Token(TokenType.RIGHT_BRACKET);
 					Step ();
 				} else if (c == '\'') {
-					_tokens.Add (new Token(TokenType.TICK));
+					newToken = new Token(TokenType.TICK);
 					Step ();
 				} else if (c == ';') {
 					while (MoreToRead() && ReadCurrentChar() != '\n') {
 						Step ();
 					}
 				} else if (c == '\"') {
-					_tokens.Add (new StringToken(ReadString ()));
+					newToken = new StringToken(ReadString ());
 				} else if (c == '&') {
-					_tokens.Add (new ReservedToken(TokenType.AMPERSAND));
+					newToken = new ReservedToken(TokenType.AMPERSAND);
 					Step ();
 				} else if (c == '.') {
-					_tokens.Add (new SymbolToken(c.ToString()));
+					newToken = new SymbolToken(c.ToString());
 					Step ();
 				} else if(CharCanBeginSymbol (c)) {
 					string text = ReadText ();
 					if(IsNumber(text)) {
-						_tokens.Add (new FloatToken(Convert.ToSingle(text)));
+						newToken = new FloatToken(Convert.ToSingle(text));
 					} else if (text == "def") {
-						_tokens.Add (new ReservedToken(TokenType.DEF));
+						newToken = new ReservedToken(TokenType.DEF);
 					} else if (text == "fn") {
-						_tokens.Add (new ReservedToken(TokenType.FN));
+						newToken = new ReservedToken(TokenType.FN);
 					} else if (text == "let") {
-						_tokens.Add (new ReservedToken(TokenType.LET));
+						newToken = new ReservedToken(TokenType.LET);
 					} else if (text == "if") {
-						_tokens.Add (new ReservedToken(TokenType.IF));
+						newToken = new ReservedToken(TokenType.IF);
 					} else if (text == "defmacro") {
-						_tokens.Add (new ReservedToken(TokenType.DEFMACRO));
+						newToken = new ReservedToken(TokenType.DEFMACRO);
 					} else if (text == "quote") {
-						_tokens.Add (new ReservedToken(TokenType.QUOTE));
+						newToken = new ReservedToken(TokenType.QUOTE);
 					} else if (text == "set!") {
-						_tokens.Add (new ReservedToken(TokenType.SET));
+						newToken = new ReservedToken(TokenType.SET);
 					} else if (text == "null") {
-						_tokens.Add (new NullToken());
+						newToken = new NullToken();
 					} else if (text == "true") {
-						_tokens.Add (new BoolToken(true));
+						newToken = new BoolToken(true);
 					} else if (text == "false") {
-						_tokens.Add (new BoolToken(false));
+						newToken = new BoolToken(false);
 					} else {
-						_tokens.Add (new SymbolToken(text));
+						newToken = new SymbolToken(text);
 					} 
 				} 
 				else {
-					throw new Exception ("Can't understand char '" + c + "'");
+					throw new Exception ("Can't understand char '" + c + "'" + " at line " + _lineNr + " and position " + _positionOnLine);
+				}
+
+				if(newToken != null) {
+					newToken.line = _lineNr;
+					newToken.position = _positionOnLine;
+					_tokens.Add (newToken);
 				}
 			}
 
@@ -93,6 +108,7 @@ namespace SharpLisp
 
 		void Step() {
 			_readPosition++;
+			_positionOnLine++;
 			//Console.WriteLine ("Stepped to " + ReadCurrentChar());
 		}
 
@@ -182,7 +198,7 @@ namespace SharpLisp
 		}
 
 		bool IsWhitespace(char c) {
-			return " ,\t\n".Contains (c.ToString());
+			return " ,\t".Contains (c.ToString());
 		}
 	}
 }

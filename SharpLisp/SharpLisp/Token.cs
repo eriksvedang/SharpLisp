@@ -27,6 +27,9 @@ namespace SharpLisp
 	{
 		public TokenType type;
 
+		public int line = 0;
+		public int position = 0;
+
 		public Token (TokenType pType) {
 			type = pType;
 		}

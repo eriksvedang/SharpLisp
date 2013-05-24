@@ -49,13 +49,20 @@ namespace SharpLisp
 			} else if (token is NullToken) {
 				sexp = null;
 			} else if (token.type == TokenType.LEFT_PAREN) {
-				sexp = ReadList ();
+				var list = ReadList ();
+				list.line = token.line;
+				list.position = token.position;
+				sexp = list;
 			} else if (token.type == TokenType.LEFT_BRACKET) {
 				sexp = ReadVector ();
 			} else if (token.type == TokenType.TICK) {
 				sexp = ReadQuoted ();
+			} else if (token.type == TokenType.RIGHT_PAREN) {
+				throw new Exception ("Unmatched ')' at line " + token.line + " and position " + token.position);
+			} else if (token.type == TokenType.RIGHT_BRACKET) {
+				throw new Exception ("Unmatched ']' at line " + token.line + " and position " + token.position);
 			} else {
-				throw new Exception ("Can't understand token " + token);
+				throw new Exception ("Can't understand token " + token + " at line " + token.line + " and position " + token.position);
 			}
 
 //			if (sexp == null) {
@@ -96,6 +103,9 @@ namespace SharpLisp
 		}
 
 		Token CurrentToken() {
+			if (_currentTokenNr > _tokens.Count - 1) {
+				throw new Exception ("Trying to read past the end of the source file. Is there an unmatched parenthesis of some sort?");
+			}
 			return _tokens [_currentTokenNr];
 		}
 

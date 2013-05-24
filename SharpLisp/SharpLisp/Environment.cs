@@ -185,7 +185,7 @@ namespace SharpLisp
 				return FunctionCall (pList, pCurrentScope);
 			} 
 
-			throw new Exception ("Can't eval function with first item " + firstItem);
+			throw new Exception ("Can't eval function with first item '" + firstItem + "' at line " + pList.line + " and position " + pList.position);
 		}
 
 		object GetEvaled(SharpList pList, int pPosition, Scope pCurrentScope) {
@@ -205,7 +205,7 @@ namespace SharpLisp
 		private object Def(SharpList pList, Scope pCurrentScope) {
 			SymbolToken symbolToken = pList [1] as SymbolToken;
 			if(symbolToken == null) {
-				throw new Exception("The first argument to def is not a symbol");
+				throw new Exception("The first argument to def is not a symbol (at line " + pList.line + " and position " + pList.position + ")");
 			}
 			globalScope.SetVar(symbolToken.value, GetEvaled(pList, 2, pCurrentScope));
 			return symbolToken;
@@ -214,7 +214,7 @@ namespace SharpLisp
 		private object Let(SharpList pList, Scope pCurrentScope) {
 			SharpVector bindingsVector = pList [1] as SharpVector;
 			if(bindingsVector == null) {
-				throw new Exception("The first argument to let is not a bindings vector");
+				throw new Exception("The first argument to let is not a bindings vector (at line " + pList.line + " and position " + pList.position + ")");
 			}
 
 			Scope letScope = new Scope ("Let" + _letScopeCounter++, pCurrentScope);

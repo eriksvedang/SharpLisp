@@ -6,6 +6,9 @@ namespace SharpLisp
 {
 	public class SharpList : System.Collections.ArrayList, ISeq
 	{
+		public int line;
+		public int position;
+
 		public SharpList ()
 		{
 		}

@@ -23,7 +23,7 @@ namespace SharpLisp
 				//Console.WriteLine("Can't find " + pSymbolToken + " in scope " + name + ", looking in enclosing scope: " + enclosingScope.name);
 				return enclosingScope.TryResolveSymbol (pSymbolToken);
 			} else {
-				throw new Exception ("Can't resolve symbol " + pSymbolToken);
+				throw new Exception ("Can't resolve symbol " + pSymbolToken + " at line " + pSymbolToken.line + " and position " + pSymbolToken.position);
 			}
 		}
 
