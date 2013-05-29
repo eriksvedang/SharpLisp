@@ -44,6 +44,7 @@
     <Compile Include="Scope.cs" />
     <Compile Include="SharpVector.cs" />
     <Compile Include="ISeq.cs" />
+    <Compile Include="Tester.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

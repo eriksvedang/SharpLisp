@@ -12,35 +12,16 @@ namespace SharpLisp
 			CultureInfo culture = new CultureInfo("");
 			Thread.CurrentThread.CurrentCulture = culture;
 
-			Environment runner = new Environment ();
+			Environment environment = new Environment ();
 
-			runner.LoadFile (new object[] { "core.lisp" });
+			// The standard library
+			environment.LoadFile (new object[] { "core.lisp" });
 
+			// REPL
 			while (true) {
 				Console.Write ("=> ");
-				runner.ReadEval (Console.ReadLine(), true);
+				environment.ReadEval (Console.ReadLine(), true);
 			}
-		}
-	}
-
-	class Tester {
-
-		public float x = -10;
-
-		public Tester() {
-
-		}
-
-		public Tester(float pValue) {
-			x = pValue;
-		}
-
-		public static float Foo(float x) {
-			return 10 * x;
-		}
-
-		public float GetX() {
-			return x;
 		}
 	}
 }

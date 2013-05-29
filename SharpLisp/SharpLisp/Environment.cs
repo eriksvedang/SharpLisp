@@ -183,7 +183,7 @@ namespace SharpLisp
 
 			if (firstItem is SharpFunction) {
 				return FunctionCall (pList, pCurrentScope);
-			} 
+			}
 
 			Error ("Can't eval function with first item '" + firstItem, pList);
 
